@@ -1,0 +1,11 @@
+DirectoryIndex index.html
+RewriteEngine on
+
+# redirect file.html to /file/
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.html\s [NC]
+RewriteRule ^ /%1/ [R=302,NE,L]
+
+# added .html extension to /file by checking presence of file.html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
