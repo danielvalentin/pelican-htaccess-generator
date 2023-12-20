@@ -1,4 +1,4 @@
-This is a small plugin for the [Pelican framework](https://getpelican.com), which generates a .htaccess file in your output folder, when Pelican generates the site.
+This is a small plugin for the [Pelican framework](https://getpelican.com), which generates a .htaccess file in your output folder, when Pelican generates the site. This is useful for removing the .html extension to get clean URLs.
 
 Currently it defaults to the plugin's .htaccess file, but
 
