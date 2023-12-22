@@ -16,7 +16,7 @@ Optional setting (in pelicanconf.py):
 Example:
 'HTACCESS_PREFERENCE' = 'content'
 
-Please note that this was created for personal use, but might be helpful for others. The logic is a bit messy I think. Might clean it up sometime.
+Please note that this was created for personal use, but might be helpful to others.
 
 ## Remember to configure your server
 
