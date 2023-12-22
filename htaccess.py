@@ -15,7 +15,10 @@ Example:
 """
 import shutil
 from pathlib import Path
+import logging
 from pelican import signals
+
+log = logging.getLogger(__name__)
 
 class Htaccess:
     """ Main class for the plugin
@@ -37,16 +40,19 @@ class Htaccess:
         path_obj = Path(pelican_object.settings['OUTPUT_PATH'])
         self.htaccess_output_path = str(path_obj.absolute()) + '/.htaccess'
         self.htaccess_path = pelican_object.settings['PLUGIN_PATHS'][0] + '/htaccess/.htaccess'
-        print(self.htaccess_path)
         if 'HTACCESS_PREFERENCE' in pelican_object.settings:
             if pelican_object.settings['HTACCESS_PREFERENCE'] == 'content':
                 path_obj = Path(pelican_object.settings['PATH'] + '/.htaccess')
                 if path_obj.is_file():
                     self.htaccess_path = pelican_object.settings['PATH'] + '/.htaccess'
+                else:
+                    log.warning('Content .htaccess file not found. Using the default.')
             elif pelican_object.settings['HTACCESS_PREFERENCE'] == 'theme':
                 path_obj = Path(pelican_object.settings['THEME'] + '/.htaccess')
                 if path_obj.is_file():
                     self.htaccess_path = pelican_object.settings['THEME'] + '/.htaccess'
+                else:
+                    log.warning('Theme .htaccess file not found. Using the default.')
             elif pelican_object.settings['HTACCESS_PREFERENCE'] == 'none':
                 self.htaccess_path = ''
 
