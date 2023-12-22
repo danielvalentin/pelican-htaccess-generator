@@ -1,12 +1,17 @@
 """
 A Pelican plugin that creates a htaccess file in the outut folder.
 Useful if you want to get rid of the .html extension for clean URL's.
-Settings:
-    'HTACCESS_USE_CONTENT_VERSION' = True/False
-- If the above setting is True, the plugin will use the .htaccess
-  in the content folder (if one exists)
-- if False it will check if the theme comes with a .htaccess file
-- If not defined it will use the default .htaccess file in this plugin.
+By default, the plugin uses the .htaccess it is shipped with.
+Optional settings (in pelicanconf.py):
+    'HTACCESS_PREFERENCE' is a string Enum
+        'content':
+            Uses the .htaccess file in the content folder (if it exists)
+        'theme':
+            Uses the .htacces file in the current theme's folder (if it exists)
+        'none':
+            The plugin doesn't generate a .htaccess file
+Example:
+'HTACCESS_PREFERENCE' = 'content'
 """
 import shutil
 from pathlib import Path
@@ -29,28 +34,41 @@ class Htaccess:
 
     def set_site_paths(self, pelican_object):
         """ Just sets the 2 different paths needed """
-        p = Path(pelican_object.settings['OUTPUT_PATH'])
-        self.htaccess_output_path = str(p.absolute()) + '/.htaccess'
-        if 'HTACCESS_USE_CONTENT_VERSION' in pelican_object.settings:
-            if pelican_object.settings['HTACCESS_USE_CONTENT_VERSION'] is True:
-                self.htaccess_path = pelican_object.settings['PATH'] + '/.htaccess'
-            elif pelican_object.settings['HTACCESS_USE_CONTENT_VERSION'] is False:
-                self.htaccess_path = pelican_object.settings["THEME"] + '/' + '.htaccess'
-        else:
-            self.htaccess_path = pelican_object.settings['PLUGIN_PATHS'][0] + '/htaccess/'
+        path_obj = Path(pelican_object.settings['OUTPUT_PATH'])
+        self.htaccess_output_path = str(path_obj.absolute()) + '/.htaccess'
+        self.htaccess_path = pelican_object.settings['PLUGIN_PATHS'][0] + '/htaccess/.htaccess'
+        print(self.htaccess_path)
+        if 'HTACCESS_PREFERENCE' in pelican_object.settings:
+            if pelican_object.settings['HTACCESS_PREFERENCE'] == 'content':
+                path_obj = Path(pelican_object.settings['PATH'] + '/.htaccess')
+                if path_obj.is_file():
+                    self.htaccess_path = pelican_object.settings['PATH'] + '/.htaccess'
+            elif pelican_object.settings['HTACCESS_PREFERENCE'] == 'theme':
+                path_obj = Path(pelican_object.settings['THEME'] + '/.htaccess')
+                if path_obj.is_file():
+                    self.htaccess_path = pelican_object.settings['THEME'] + '/.htaccess'
+            elif pelican_object.settings['HTACCESS_PREFERENCE'] == 'none':
+                self.htaccess_path = ''
 
     def check_for_htaccess_file(self):
         """Just checks if the selected .htaccess file exists"""
-        p = Path(self.htaccess_path)
-        return p.is_file()
+        #if 'HTACCESS_PREFERENCE' in pelican_object.settings:
+            #if pelican_object.settings['HTACCESS_PREFERENCE'] == 'none':
+                #return false
+        path_obj = Path(self.htaccess_path)
+        return path_obj.is_file()
 
     def copy_htaccess_from_file(self):
-        """ If 'HTACCESS_USE_CONTENT_VERSION' is not set:
+        """ If 'HTACCESS_PREFERENCE' is not set (default):
                 copies the default htaccess file from the plugin dir
-            If it is set and is True:
+            If it is set and is 'content':
                 copies the .htaccess file in the content dir (if it exists)
-            If is is set and is False:
+            If is is set and is 'theme':
                 copies the file from the current theme's dir (if it exists)
+            If is is set and is 'none':
+                No .htaccess file is generated
+            If 'HTACCESS_PREFERENCE' is set, but the file is not found,
+                the plugin will default to the plugin's .htaccess
         """
         shutil.copyfile(self.htaccess_path, self.htaccess_output_path)
 
